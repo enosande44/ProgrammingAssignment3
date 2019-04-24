@@ -4,9 +4,9 @@
 library(tidyr)
 library(dplyr)
 path<-getwd()
-url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-download.file(url, file.path(path, "dataFiles.zip"))
-unzip(zipfile = "dataFiles.zip")
+#url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+#download.file(url, file.path(path, "dataFiles.zip"))
+#unzip(zipfile = "dataFiles.zip")
 assPath<-"./UCI HAR Dataset/"
 setwd(assPath)
 
@@ -44,5 +44,19 @@ merged<-bind_rows(train,test) %>%
 merged<-merged %>% mutate(SubjectID = factor(SubjectID), activity_label = factor(activity_label))
 merged<-reshape2::melt(data = merged, id = c("SubjectID", "activity_label"))
 merged<-reshape2::dcast(data = merged, SubjectID + activity_label ~ variable, fun.aggregate = mean)
-write.table(merged, file = "./UCI HAR Dataset/tidyData.txt", row.names = FALSE)
+
+# Descriptive Activity Names
+mergeNames<-gsub("tBodyAcc", "timeBodyAccelerometer", names(merged))
+mergeNames<-gsub("tGravityAcc", "timeGravityAccelerometer", mergeNames)
+mergeNames<-gsub("tBodyGyro", "timeBodyGyroscope", mergeNames)
+mergeNames<-gsub("fBodyAcc", "frequencyBodyAccelerometer", mergeNames)
+mergeNames<-gsub("fBodyGyro", "frequencyBodyGyroscope", mergeNames)
+mergeNames<-gsub("Mag", "Magnitude", mergeNames)
+mergeNames<-gsub("std", "StandardDeviation", mergeNames)
+mergeNames<-gsub("fBodyBodyAcc", "frequencyBodyAccelerometer", mergeNames)
+mergeNames<-gsub("fBodyBodyGyro", "frequencyBodyGyroscope", mergeNames)
+names(merged)<- mergeNames
+
+# Create second independent dataset
+write.table(merged, file = "./tidyData.txt", row.names = FALSE)
 setwd(path)
